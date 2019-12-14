@@ -9,8 +9,9 @@
 .line {
     width: 50px;
     height: 1px;
-    color: #2d3436;
+    background: black;
     display: block;
+    margin-bottom: 20px;
 }
 
 .logo {
@@ -75,13 +76,29 @@
     float: right;
 }
 
+.portfolio p {
+    margin-bottom: 80px;
+}
+
 .portfolio ul {
     list-style: none;
+}
+
+.kodilla {
+    color: #02AC46;
+}
+
+.kodilla:hover {
+    text-decoration: none;
+    color: #02AC46;
 }
 
 .project {
     margin: 30px 0;
     transition: transform .5s;
+    -webkit-box-shadow: 0px 0px 12px -1px rgba(52, 73, 94, 0.45);
+    -moz-box-shadow: 0px 0px 12px -1px rgba(52, 73, 94, 0.45);
+    box-shadow: 0px 0px 12px -1px rgba(52, 73, 94, 0.45);
 }
 
 .project:hover {
@@ -90,12 +107,14 @@
 
 .project-photo img {
     border-radius: 3px;
-    border: 1px solid #636e72;
 }
 
 .contact {
     width: 100%;
-    text-align: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 }
 
 .contact p {
@@ -106,13 +125,11 @@
     list-style: none;
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: center;
 }
 
 .contact ul li {
     font-size: 30px;
-    padding: 10px 30px;
+    padding: 10px 30px 10px 0;
 }
 
 .contact ul li a {
