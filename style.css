@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Montserrat:400,500,700&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700&display=swap');
 * {
     margin: 0;
     padding: 0;
@@ -8,7 +8,7 @@
 
 .line {
     width: 50px;
-    height: 1px;
+    height: 2px;
     background: black;
     display: block;
     margin-bottom: 20px;
@@ -109,6 +109,13 @@
     border-radius: 3px;
 }
 
+.project-single {
+    margin: 30px 0;
+    -webkit-box-shadow: 0px 0px 12px -1px rgba(52, 73, 94, 0.45);
+    -moz-box-shadow: 0px 0px 12px -1px rgba(52, 73, 94, 0.45);
+    box-shadow: 0px 0px 12px -1px rgba(52, 73, 94, 0.45);
+}
+
 .contact {
     width: 100%;
     display: flex;
@@ -122,6 +129,7 @@
 }
 
 .contact ul {
+    margin-bottom: 0;
     list-style: none;
     display: flex;
     flex-direction: row;
@@ -129,9 +137,64 @@
 
 .contact ul li {
     font-size: 30px;
-    padding: 10px 30px 10px 0;
+    padding: 10px 30px 0 0;
 }
 
 .contact ul li a {
     color: #2d3436;
+}
+
+.project-overview h2 {
+    margin: 250px 0 30px 0;
+}
+
+.project-overview h4 {
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+.project-overview h3 {
+    margin: 30px 0;
+}
+
+.project-overview ul {
+    margin-left: 18px;
+}
+
+.project-overview ul li {
+    margin: 15px 0;
+}
+
+.project-overview i {
+    font-size: 30px;
+    padding: 10px 30px 0 0;
+    color: black;
+}
+
+.github-repo {
+    font-weight: 600;
+}
+
+.github-repo a {
+    text-decoration: none;
+    color: black;
+}
+
+.github-repo a:hover {
+    text-decoration: none;
+    color: black;
+}
+
+.project-line {
+    width: 200px;
+    height: 2px;
+    margin: 50px auto;
+}
+
+.footer {
+    margin-top: 50px;
+}
+
+.footer p {
+    padding: 20px 0;
 }
