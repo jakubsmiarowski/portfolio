@@ -6,6 +6,11 @@
     font-family: 'Montserrat', sans-serif;
 }
 
+.container {
+    padding-left: 70px;
+    padding-right: 70px;
+}
+
 .line {
     width: 50px;
     height: 2px;
@@ -15,8 +20,13 @@
 }
 
 .logo {
+    padding: 0 20px;
     margin-top: 30px;
-    padding: 0 15px;
+}
+
+.logo img {
+    width: 150px;
+    height: 150px;
 }
 
 .nav-bar {
@@ -74,6 +84,11 @@
     background-color: #0984e3;
     color: white;
     float: right;
+}
+
+.about-content p {
+    font-size: 18px;
+    line-height: 1.75;
 }
 
 .portfolio p {
@@ -145,7 +160,7 @@
 }
 
 .project-overview h2 {
-    margin: 250px 0 30px 0;
+    margin: 200px 0 30px 0;
 }
 
 .project-overview h4 {
@@ -157,12 +172,18 @@
     margin: 30px 0;
 }
 
+.project-overview p {
+    font-size: 18px;
+    line-height: 1.75;
+}
+
 .project-overview ul {
     margin-left: 18px;
 }
 
 .project-overview ul li {
     margin: 15px 0;
+    font-size: 18px;
 }
 
 .project-overview i {
@@ -197,4 +218,15 @@
 
 .footer p {
     padding: 20px 0;
+}
+
+@media screen and (max-width: 575px) {
+    .hero {
+        margin-top: 200px;
+        margin-bottom: 150px;
+    }
+    .hero-button {
+        float: left;
+        margin-top: 20px;
+    }
 }
