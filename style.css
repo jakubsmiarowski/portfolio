@@ -261,6 +261,10 @@
 }
 
 @media screen and (max-width: 575px) {
+    .container {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
     .hero {
         margin-top: 150px;
         margin-bottom: 150px;
@@ -268,6 +272,9 @@
     .hero-button {
         float: left;
         margin-top: 20px;
+    }
+    .hero-content h2 {
+        font-size: 30px;
     }
     .hero-content h2:nth-child(1) {
         margin-bottom: 20px;
