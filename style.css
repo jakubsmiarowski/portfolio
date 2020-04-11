@@ -120,6 +120,10 @@
     color: #02AC46;
 }
 
+.eduweb {
+    text-decoration: none;
+}
+
 .kodilla:hover {
     text-decoration: none;
     color: #02AC46;
@@ -256,18 +260,6 @@
 .footer-content img {
     width: 50px;
     height: 50px;
-}
-
-@keyframes example {
-    0% {
-        width: 0%
-    }
-    50% {
-        width: 100%
-    }
-    100% {
-        width: 0%
-    }
 }
 
 @media screen and (max-width: 575px) {
