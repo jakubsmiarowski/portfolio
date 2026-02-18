@@ -1,6 +1,6 @@
 # Portfolio (TanStack Start + Convex)
 
-Minimalist portfolio inspired by the DennisLV layout, with a realtime Convex-powered admin panel.
+Minimalist portfolio, with a realtime Convex-powered admin panel.
 
 ## Features
 
@@ -26,51 +26,6 @@ Minimalist portfolio inspired by the DennisLV layout, with a realtime Convex-pow
 - Convex (database + realtime functions)
 - Better Auth (kept in codebase, planned to enable after content work)
 - Tailwind + shadcn/ui
-
-## Setup
-
-1. Install dependencies:
-
-```bash
-pnpm install
-```
-
-2. Configure `.env`:
-
-```env
-CONVEX_DEPLOYMENT=...
-VITE_CONVEX_URL=...
-VITE_CONVEX_SITE_URL=...
-
-BETTER_AUTH_URL=http://localhost:3000
-BETTER_AUTH_SECRET=...
-
-OWNER_EMAILS=smiarowski.jakub@gmail.com
-ADMIN_ISSUE_SECRET=dev-admin-issue-secret-change-me
-
-GOOGLE_CLIENT_ID=...
-GOOGLE_CLIENT_SECRET=...
-```
-
-3. Configure Spotify secrets in Convex environment:
-
-```bash
-npx convex env set SPOTIFY_CLIENT_ID your_client_id
-npx convex env set SPOTIFY_CLIENT_SECRET your_client_secret
-npx convex env set SPOTIFY_REFRESH_TOKEN your_refresh_token
-```
-
-4. Run locally:
-
-```bash
-pnpm dev
-```
-
-5. Build:
-
-```bash
-pnpm build
-```
 
 ## Notes
 
