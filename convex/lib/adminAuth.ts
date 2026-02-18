@@ -3,7 +3,7 @@ import type { Doc } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
 
 export const adminTokenArg = { adminToken: v.string() }
-const OPEN_ADMIN_MODE = true
+const OPEN_ADMIN_MODE = false
 
 type AdminCtx = QueryCtx | MutationCtx
 type AdminSessionDoc = Doc<'adminSessions'>

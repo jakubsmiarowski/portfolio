@@ -107,9 +107,15 @@ export const issueAdminToken = createServerFn({ method: 'GET' }).handler(
 )
 
 export const revokeAdminToken = createServerFn({ method: 'POST' }).handler(
-  async ({ data }) => {
-    const adminToken = (data as { adminToken?: string } | undefined)?.adminToken
-    if (!adminToken) {
+  async () => {
+    const request = getRequest()
+    const sessionData = await auth.api.getSession({ headers: request.headers })
+    const email = getSessionEmail(sessionData)
+    if (!email) {
+      return { ok: false }
+    }
+
+    if (!getOwnerEmails().has(email)) {
       return { ok: false }
     }
 
@@ -119,8 +125,9 @@ export const revokeAdminToken = createServerFn({ method: 'POST' }).handler(
     }
 
     const client = new ConvexHttpClient(convexUrl)
-    await client.mutation(api.adminSessions.revoke, {
-      adminToken,
+    await client.mutation(api.adminSessions.revokeByOwner, {
+      ownerEmail: email,
+      issueSecret: getIssueSecret(),
     })
 
     return { ok: true }

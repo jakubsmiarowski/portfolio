@@ -54,3 +54,28 @@ export const revoke = mutation({
     return { success: true }
   },
 })
+
+export const revokeByOwner = mutation({
+  args: {
+    ownerEmail: v.string(),
+    issueSecret: v.string(),
+  },
+  handler: async (ctx, args) => {
+    if (args.issueSecret !== getIssueSecret()) {
+      throw new Error('Unauthorized token revoke request')
+    }
+
+    const ownerSessions = await ctx.db
+      .query('adminSessions')
+      .withIndex('by_ownerEmail', (q) => q.eq('ownerEmail', args.ownerEmail))
+      .collect()
+
+    for (const session of ownerSessions) {
+      if (!session.revoked && session.expiresAt > Date.now()) {
+        await ctx.db.patch(session._id, { revoked: true })
+      }
+    }
+
+    return { success: true }
+  },
+})

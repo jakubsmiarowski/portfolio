@@ -28,6 +28,16 @@ export const Route = createRootRoute({
     ],
     links: [
       {
+        rel: 'icon',
+        type: 'image/svg+xml',
+        href: '/favicon.svg',
+      },
+      {
+        rel: 'icon',
+        type: 'image/jpeg',
+        href: '/kuba.jpeg',
+      },
+      {
         rel: 'stylesheet',
         href: appCss,
       },

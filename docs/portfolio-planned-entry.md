@@ -56,9 +56,9 @@ Behind the scenes, I also set up the email system that sends confirmations, remi
 
 ## Cover image URL
 ```
-https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200
+/planned-com-landing.png
 ```
-*(optional: conference room / event photo – you can replace with another)*
+*(local screenshot captured from planned.com landing page)*
 
 ---
 

@@ -49,11 +49,10 @@ The project is in production; the platform handles trip registrations, promotion
 ---
 
 ## Cover image URL
-*(if you have a site screenshot or logo – paste link; placeholder for now)*
+*(local screenshot captured from mrr.bike landing page)*
 ```
-https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200
+/mrr-bike-landing.png
 ```
-*(described image: motorcycle / track – you can replace with your own.)*
 
 ## Live URL
 ```

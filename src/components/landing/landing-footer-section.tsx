@@ -1,8 +1,10 @@
+import { Link } from '@tanstack/react-router'
+
 export function LandingFooterSection() {
   return (
     <footer className="mt-16 border-t pt-6 text-sm text-muted-foreground">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p>© Kuba Smiarowski</p>
+        <p>© Kuba Śmiarowski</p>
         <div className="flex items-center gap-4">
           <a
             href="https://github.com/jakubsmiarowski"
@@ -20,9 +22,9 @@ export function LandingFooterSection() {
           >
             LinkedIn
           </a>
-          <a href="/admin" className="hover:text-foreground">
+          <Link to="/admin" className="hover:text-foreground">
             Admin
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

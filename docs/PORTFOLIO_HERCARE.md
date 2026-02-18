@@ -51,9 +51,9 @@ The project was built from scratch by me. Tech stack: Next.js 15 (App Router), R
 
 ## Cover image URL
 ```
-https://hercare.pl/static/HerCare.png
+/hercare-pl-landing.png
 ```
-*(Used in the project for OpenGraph – `app/layout.tsx`; size 3275×2956. You can also upload your own app screenshot.)*
+*(local screenshot captured from hercare.pl landing page)*
 
 ---
 
@@ -99,7 +99,7 @@ published
 - [ ] Slug and Title filled in
 - [ ] Headline and Summary pasted
 - [ ] Body paragraphs pasted (3 paragraphs as above)
-- [ ] Cover image URL: HerCare.png or your own screenshot
+- [ ] Cover image URL: /hercare-pl-landing.png
 - [ ] Live URL: https://hercare.pl (or www)
 - [ ] Repo URL: filled in or intentionally left empty (private)
 - [ ] Tags match the portfolio
