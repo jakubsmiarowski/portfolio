@@ -86,7 +86,7 @@ export function AdminProjectsTab({
       detailImageUrl:
         'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
       landingImageFit: 'cover' as const,
-      detailImageFit: 'contain' as const,
+      detailImageFit: 'cover' as const,
       liveUrl: 'https://corporate-events-demo.vercel.app',
       repoUrl: 'https://github.com/example/corporate-events',
       caseStudyUrl: 'https://medium.com/example/corporate-events-case-study',
@@ -129,7 +129,7 @@ export function AdminProjectsTab({
       detailImageUrl:
         'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200',
       landingImageFit: 'cover' as const,
-      detailImageFit: 'contain' as const,
+      detailImageFit: 'cover' as const,
       liveUrl: 'https://mrr.bike/',
       repoUrl: '',
       caseStudyUrl: '',
@@ -203,7 +203,7 @@ export function AdminProjectsTab({
       landingImageUrl,
       detailImageUrl,
       landingImageFit: projectWithMedia.landingImageFit || 'cover',
-      detailImageFit: projectWithMedia.detailImageFit || 'contain',
+      detailImageFit: projectWithMedia.detailImageFit || 'cover',
       liveUrl: project.liveUrl || '',
       repoUrl: project.repoUrl || '',
       caseStudyUrl: project.caseStudyUrl || '',

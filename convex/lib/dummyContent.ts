@@ -38,7 +38,7 @@ export const dummyProjects = [
     detailImageUrl:
       'https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=1400&q=80',
     landingImageFit: 'cover' as const,
-    detailImageFit: 'contain' as const,
+    detailImageFit: 'cover' as const,
     liveUrl: 'https://example.com/portal-velocity',
     repoUrl: 'https://github.com/jakubsmiarowski/portal-velocity',
     caseStudyUrl: '',
@@ -87,7 +87,7 @@ export const dummyProjects = [
     detailImageUrl:
       'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80',
     landingImageFit: 'cover' as const,
-    detailImageFit: 'contain' as const,
+    detailImageFit: 'cover' as const,
     liveUrl: 'https://example.com/sekei-growth-page',
     repoUrl: 'https://github.com/jakubsmiarowski/sekei-growth-page',
     caseStudyUrl: '',
@@ -136,7 +136,7 @@ export const dummyProjects = [
     detailImageUrl:
       'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1400&q=80',
     landingImageFit: 'cover' as const,
-    detailImageFit: 'contain' as const,
+    detailImageFit: 'cover' as const,
     liveUrl: 'https://example.com/ops-signal-dashboard',
     repoUrl: 'https://github.com/jakubsmiarowski/ops-signal-dashboard',
     caseStudyUrl: '',

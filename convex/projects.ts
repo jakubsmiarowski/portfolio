@@ -171,7 +171,7 @@ export const create = mutation({
         landingImageUrl,
         detailImageUrl,
         landingImageFit: normalizeProjectImageFit(args.landingImageFit, 'cover'),
-        detailImageFit: normalizeProjectImageFit(args.detailImageFit, 'contain'),
+        detailImageFit: normalizeProjectImageFit(args.detailImageFit, 'cover'),
         liveUrl: normalizeOptionalString(args.liveUrl),
         repoUrl: normalizeOptionalString(args.repoUrl),
         caseStudyUrl: normalizeOptionalString(args.caseStudyUrl),
@@ -309,7 +309,7 @@ export const update = mutation({
     }
 
     if ('detailImageFit' in args) {
-      patch.detailImageFit = normalizeProjectImageFit(args.detailImageFit, 'contain')
+      patch.detailImageFit = normalizeProjectImageFit(args.detailImageFit, 'cover')
     }
 
     if (

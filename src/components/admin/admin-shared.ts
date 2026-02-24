@@ -121,7 +121,7 @@ export function createEmptyProjectForm(): ProjectFormState {
     landingImageUrl: '',
     detailImageUrl: '',
     landingImageFit: 'cover',
-    detailImageFit: 'contain',
+    detailImageFit: 'cover',
     liveUrl: '',
     repoUrl: '',
     caseStudyUrl: '',

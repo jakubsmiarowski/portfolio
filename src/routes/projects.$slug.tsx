@@ -14,7 +14,6 @@ import { Separator } from '@/components/ui/separator'
 import { useAnalytics } from '@/lib/analytics'
 import {
   normalizeImageReferenceForRender,
-  normalizeProjectImageFit,
 } from '@/lib/image-ref'
 
 export const Route = createFileRoute('/projects/$slug')({
@@ -127,10 +126,6 @@ function ProjectPage() {
   const projectWithMedia = project as ProjectWithMedia
   const detailImageUrl = normalizeImageReferenceForRender(
     projectWithMedia.detailImageUrl || project.coverImageUrl,
-  )
-  const detailImageFit = normalizeProjectImageFit(
-    projectWithMedia.detailImageFit,
-    'contain',
   )
 
   return (
@@ -256,14 +251,12 @@ function ProjectPage() {
             >
               <div
                 style={{ backgroundColor: project.bgTint ?? '#f6f8fa' }}
-                className="border-b p-2"
+                className="border-b"
               >
                 <img
                   src={detailImageUrl}
                   alt={project.title}
-                  className={`h-[260px] w-full rounded-2xl ${
-                    detailImageFit === 'contain' ? 'object-contain' : 'object-cover'
-                  } sm:h-[300px]`}
+                  className="block h-[260px] w-full object-cover sm:h-[300px]"
                 />
               </div>
               <div className="space-y-3 p-5">
