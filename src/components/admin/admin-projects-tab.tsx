@@ -548,7 +548,8 @@ export function AdminProjectsTab({
           <div>
             <p className="text-sm font-medium text-foreground/90">Project images</p>
             <p className="text-xs text-muted-foreground">
-              Shortcut: <code>/pg</code> resolves to <code>/pictures/pg.jpeg</code>.
+              Shortcut: <code>/pg</code> resolves to <code>/pictures/pg.jpeg</code>. External
+              URLs must point to an image file (not a photo page URL).
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
