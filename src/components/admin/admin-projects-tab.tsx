@@ -24,6 +24,7 @@ type AdminProjectsTabProps = {
 }
 
 const MIN_PROJECT_YEAR = 1990
+const PROJECT_YEAR_PATTERN = /^(\d{4})(?:\s*-\s*(\d{4}))?$/
 
 export function AdminProjectsTab({
   adminToken,
@@ -151,7 +152,7 @@ export function AdminProjectsTab({
 
   const loadProjectToForm = (project: Doc<'projects'>) => {
     const projectWithMedia = project as Doc<'projects'> & {
-      year?: number
+      year?: string | number
       landingImageUrl?: string
       detailImageUrl?: string
       landingImageFit?: 'cover' | 'contain'
@@ -193,9 +194,11 @@ export function AdminProjectsTab({
       summary: project.summary,
       featureCards,
       year:
-        typeof projectWithMedia.year === 'number'
-          ? String(projectWithMedia.year)
-          : '',
+        typeof projectWithMedia.year === 'string'
+          ? projectWithMedia.year
+          : typeof projectWithMedia.year === 'number'
+            ? String(projectWithMedia.year)
+            : '',
       coverImageUrl: landingImageUrl,
       landingImageUrl,
       detailImageUrl,
@@ -220,18 +223,36 @@ export function AdminProjectsTab({
       return
     }
 
-    const year = Number.parseInt(projectForm.year, 10)
-    if (!Number.isInteger(year)) {
-      onGlobalMessage('Year is required and must be a number.')
+    const normalizedYearInput = projectForm.year.trim()
+    if (!normalizedYearInput) {
+      onGlobalMessage('Year is required.')
       return
     }
 
-    if (year < MIN_PROJECT_YEAR || year > maxProjectYear) {
-      onGlobalMessage(
-        `Year must be between ${MIN_PROJECT_YEAR} and ${maxProjectYear}.`,
-      )
+    const yearMatch = normalizedYearInput.match(PROJECT_YEAR_PATTERN)
+    if (!yearMatch) {
+      onGlobalMessage('Year must be in format YYYY or YYYY-YYYY.')
       return
     }
+
+    const startYear = Number.parseInt(yearMatch[1], 10)
+    const endYear = yearMatch[2] ? Number.parseInt(yearMatch[2], 10) : undefined
+    if (
+      startYear < MIN_PROJECT_YEAR ||
+      startYear > maxProjectYear ||
+      (endYear !== undefined &&
+        (endYear < MIN_PROJECT_YEAR || endYear > maxProjectYear))
+    ) {
+      onGlobalMessage(`Year must be between ${MIN_PROJECT_YEAR} and ${maxProjectYear}.`)
+      return
+    }
+
+    if (endYear !== undefined && endYear < startYear) {
+      onGlobalMessage('Year range end must be greater than or equal to start.')
+      return
+    }
+
+    const year = endYear !== undefined ? `${startYear}-${endYear}` : `${startYear}`
 
     const landingImageUrl =
       projectForm.landingImageUrl.trim() || projectForm.coverImageUrl.trim()
@@ -364,13 +385,13 @@ export function AdminProjectsTab({
           />
           <Input
             placeholder="Year"
-            type="number"
-            min={MIN_PROJECT_YEAR}
-            max={maxProjectYear}
+            type="text"
             value={projectForm.year}
             onChange={(event) =>
               setProjectForm((prev) => ({ ...prev, year: event.target.value }))
             }
+            pattern="^\d{4}(\s*-\s*\d{4})?$"
+            title="Use format YYYY or YYYY-YYYY"
             required
           />
         </div>
@@ -670,9 +691,16 @@ export function AdminProjectsTab({
                   <p className="font-medium">{project.title}</p>
                   <p className="text-xs text-muted-foreground">
                     /{project.slug}
-                    {typeof (project as { year?: number }).year === 'number'
-                      ? ` • ${(project as { year?: number }).year}`
-                      : ''}
+                    {(() => {
+                      const yearValue = (project as { year?: string | number }).year
+                      if (typeof yearValue === 'string' && yearValue.trim()) {
+                        return ` • ${yearValue.trim()}`
+                      }
+                      if (typeof yearValue === 'number') {
+                        return ` • ${yearValue}`
+                      }
+                      return ''
+                    })()}
                   </p>
                 </div>
                 <Badge

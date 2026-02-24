@@ -30,7 +30,7 @@ export const dummyProjects = [
           'The result was a reusable foundation that accelerated internal iteration and de-risked future mobile roadmap work.',
       },
     ],
-    year: 2026,
+    year: '2026',
     coverImageUrl:
       'https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=1400&q=80',
     landingImageUrl:
@@ -79,7 +79,7 @@ export const dummyProjects = [
           'In the first month, the page became a core growth surface and contributed meaningful new revenue.',
       },
     ],
-    year: 2025,
+    year: '2025',
     coverImageUrl:
       'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80',
     landingImageUrl:
@@ -128,7 +128,7 @@ export const dummyProjects = [
           'Support and product leads gained faster context switching, better prioritization, and cleaner handoff flow.',
       },
     ],
-    year: 2024,
+    year: '2024',
     coverImageUrl:
       'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1400&q=80',
     landingImageUrl:

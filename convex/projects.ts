@@ -9,6 +9,7 @@ type FeatureCardInput = { title: string; emoji?: string; content: string }
 type ProjectImageFit = 'cover' | 'contain'
 
 const MIN_PROJECT_YEAR = 1990
+const PROJECT_YEAR_PATTERN = /^(\d{4})(?:\s*-\s*(\d{4}))?$/
 
 function normalizeOptionalString(value: string | undefined) {
   if (value === undefined) {
@@ -39,21 +40,39 @@ function normalizeProjectImageFit(value: ProjectImageFit | undefined, fallback: 
   return value === 'contain' ? 'contain' : fallback
 }
 
-function normalizeProjectYear(value: number | undefined) {
+function normalizeProjectYear(value: string | undefined) {
   if (value === undefined) {
     return undefined
   }
 
-  if (!Number.isInteger(value)) {
-    throw new Error('Year must be an integer')
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return undefined
   }
 
+  const match = trimmed.match(PROJECT_YEAR_PATTERN)
+  if (!match) {
+    throw new Error('Year must be in format YYYY or YYYY-YYYY')
+  }
+
+  const startYear = Number.parseInt(match[1], 10)
+  const endYear = match[2] ? Number.parseInt(match[2], 10) : undefined
   const maxYear = new Date().getFullYear() + 1
-  if (value < MIN_PROJECT_YEAR || value > maxYear) {
+  if (startYear < MIN_PROJECT_YEAR || startYear > maxYear) {
     throw new Error(`Year must be between ${MIN_PROJECT_YEAR} and ${maxYear}`)
   }
 
-  return value
+  if (endYear !== undefined) {
+    if (endYear < MIN_PROJECT_YEAR || endYear > maxYear) {
+      throw new Error(`Year must be between ${MIN_PROJECT_YEAR} and ${maxYear}`)
+    }
+    if (endYear < startYear) {
+      throw new Error('Year range end must be greater than or equal to start')
+    }
+    return `${startYear}-${endYear}`
+  }
+
+  return `${startYear}`
 }
 
 export const listPublished = query({
@@ -93,7 +112,7 @@ export const create = mutation({
         }),
       ),
     ),
-    year: v.optional(v.number()),
+    year: v.optional(v.string()),
     coverImageUrl: v.string(),
     landingImageUrl: v.optional(v.string()),
     detailImageUrl: v.optional(v.string()),
@@ -186,7 +205,7 @@ export const update = mutation({
         }),
       ),
     ),
-    year: v.optional(v.number()),
+    year: v.optional(v.string()),
     coverImageUrl: v.optional(v.string()),
     landingImageUrl: v.optional(v.string()),
     detailImageUrl: v.optional(v.string()),

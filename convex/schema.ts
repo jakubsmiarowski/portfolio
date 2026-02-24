@@ -17,7 +17,7 @@ export default defineSchema({
         }),
       ),
     ),
-    year: v.optional(v.number()),
+    year: v.optional(v.string()),
     coverImageUrl: v.string(),
     landingImageUrl: v.optional(v.string()),
     detailImageUrl: v.optional(v.string()),

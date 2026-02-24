@@ -22,7 +22,7 @@ export const Route = createFileRoute('/')({ component: PortfolioPage })
 
 type Project = Doc<'projects'>
 type ProjectWithMedia = Project & {
-  year?: number
+  year?: string | number
   landingImageUrl?: string
   landingImageFit?: 'cover' | 'contain'
 }
@@ -90,8 +90,11 @@ function PortfolioPage() {
   const showcaseProjects = useMemo<ProjectShowcaseItem[]>(() => {
     const guessYear = (project: Project, index: number) => {
       const projectWithMedia = project as ProjectWithMedia
+      if (typeof projectWithMedia.year === 'string' && projectWithMedia.year.trim()) {
+        return projectWithMedia.year.trim()
+      }
       if (typeof projectWithMedia.year === 'number') {
-        return String(projectWithMedia.year)
+        return `${projectWithMedia.year}`
       }
 
       const source = `${project.title} ${project.headline} ${project.summary} ${project.body.join(' ')}`

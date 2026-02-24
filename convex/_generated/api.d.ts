@@ -12,6 +12,7 @@ import type * as adminSessions from "../adminSessions.js";
 import type * as analytics from "../analytics.js";
 import type * as lib_adminAuth from "../lib/adminAuth.js";
 import type * as lib_dummyContent from "../lib/dummyContent.js";
+import type * as lib_imageRef from "../lib/imageRef.js";
 import type * as lib_object from "../lib/object.js";
 import type * as messages from "../messages.js";
 import type * as projects from "../projects.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
   "lib/adminAuth": typeof lib_adminAuth;
   "lib/dummyContent": typeof lib_dummyContent;
+  "lib/imageRef": typeof lib_imageRef;
   "lib/object": typeof lib_object;
   messages: typeof messages;
   projects: typeof projects;
