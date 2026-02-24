@@ -11,6 +11,7 @@ export interface ProjectShowcaseItem {
   year: string
   link: string
   image: string
+  imageFit: 'cover' | 'contain'
 }
 
 export function ProjectShowcase({ projects }: { projects: ProjectShowcaseItem[] }) {
@@ -91,11 +92,12 @@ export function ProjectShowcase({ projects }: { projects: ProjectShowcaseItem[] 
               key={project.title}
               src={project.image || "/placeholder.svg"}
               alt={project.title}
-              className="absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-out"
+              className="absolute inset-0 h-full w-full transition-all duration-500 ease-out"
               style={{
                 opacity: hoveredIndex === index ? 1 : 0,
                 scale: hoveredIndex === index ? 1 : 1.1,
                 filter: hoveredIndex === index ? "none" : "blur(10px)",
+                objectFit: project.imageFit,
               }}
             />
           ))}

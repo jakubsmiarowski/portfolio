@@ -12,12 +12,20 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useAnalytics } from '@/lib/analytics'
+import {
+  normalizeImageReferenceForRender,
+  normalizeProjectImageFit,
+} from '@/lib/image-ref'
 
 export const Route = createFileRoute('/projects/$slug')({
   component: ProjectPage,
 })
 
 type Project = Doc<'projects'>
+type ProjectWithMedia = Project & {
+  detailImageUrl?: string
+  detailImageFit?: 'cover' | 'contain'
+}
 
 const defaultFeatureMeta = [
   { title: 'Summary', emoji: '✨' },
@@ -116,6 +124,14 @@ function ProjectPage() {
   }
 
   const featureCards = toFeatureCards(project)
+  const projectWithMedia = project as ProjectWithMedia
+  const detailImageUrl = normalizeImageReferenceForRender(
+    projectWithMedia.detailImageUrl || project.coverImageUrl,
+  )
+  const detailImageFit = normalizeProjectImageFit(
+    projectWithMedia.detailImageFit,
+    'contain',
+  )
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -243,9 +259,11 @@ function ProjectPage() {
                 className="border-b p-2"
               >
                 <img
-                  src={project.coverImageUrl}
+                  src={detailImageUrl}
                   alt={project.title}
-                  className="h-[260px] w-full rounded-2xl object-cover sm:h-[300px]"
+                  className={`h-[260px] w-full rounded-2xl ${
+                    detailImageFit === 'contain' ? 'object-contain' : 'object-cover'
+                  } sm:h-[300px]`}
                 />
               </div>
               <div className="space-y-3 p-5">

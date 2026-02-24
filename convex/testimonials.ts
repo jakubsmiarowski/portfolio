@@ -2,6 +2,7 @@ import { mutation, query } from './_generated/server'
 import { v } from 'convex/values'
 
 import { adminTokenArg, requireAdmin } from './lib/adminAuth'
+import { normalizeImageReference } from './lib/imageRef'
 import { pickDefined } from './lib/object'
 
 export const listPublished = query({
@@ -52,11 +53,13 @@ export const create = mutation({
     }
 
     const now = Date.now()
+    const avatarUrl = normalizeImageReference(args.avatarUrl)
+
     return await ctx.db.insert('testimonials', {
       personName: args.personName,
       personRole: args.personRole,
       company: args.company,
-      avatarUrl: args.avatarUrl,
+      avatarUrl,
       quote: args.quote,
       isPublished: args.isPublished,
       order,
@@ -86,19 +89,21 @@ export const update = mutation({
       throw new Error('Testimonial not found')
     }
 
-    return await ctx.db.patch(
-      args.id,
-      pickDefined({
-        personName: args.personName,
-        personRole: args.personRole,
-        company: args.company,
-        avatarUrl: args.avatarUrl,
-        quote: args.quote,
-        isPublished: args.isPublished,
-        order: args.order,
-        updatedAt: Date.now(),
-      }),
-    )
+    const patch = pickDefined({
+      personName: args.personName,
+      personRole: args.personRole,
+      company: args.company,
+      quote: args.quote,
+      isPublished: args.isPublished,
+      order: args.order,
+      updatedAt: Date.now(),
+    }) as Record<string, unknown>
+
+    if ('avatarUrl' in args) {
+      patch.avatarUrl = normalizeImageReference(args.avatarUrl)
+    }
+
+    return await ctx.db.patch(args.id, patch as never)
   },
 })
 

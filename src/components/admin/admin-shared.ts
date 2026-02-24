@@ -20,7 +20,12 @@ export type ProjectFormState = {
   headline: string
   summary: string
   featureCards: FeatureCardForm[]
+  year: string
   coverImageUrl: string
+  landingImageUrl: string
+  detailImageUrl: string
+  landingImageFit: 'cover' | 'contain'
+  detailImageFit: 'cover' | 'contain'
   liveUrl: string
   repoUrl: string
   caseStudyUrl: string
@@ -111,7 +116,12 @@ export function createEmptyProjectForm(): ProjectFormState {
     headline: '',
     summary: '',
     featureCards: createDefaultFeatureCards(),
+    year: '',
     coverImageUrl: '',
+    landingImageUrl: '',
+    detailImageUrl: '',
+    landingImageFit: 'cover',
+    detailImageFit: 'contain',
     liveUrl: '',
     repoUrl: '',
     caseStudyUrl: '',

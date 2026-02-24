@@ -1,6 +1,7 @@
 import type { Doc } from 'convex/_generated/dataModel'
 
 import { NowPlayingWidget } from '@/components/now-playing-widget'
+import { normalizeImageReferenceForRender } from '@/lib/image-ref'
 
 type Testimonial = Doc<'testimonials'>
 
@@ -43,7 +44,10 @@ export function LandingTestimonialsSection({
             }`}
           >
             <img
-              src={item.avatarUrl || 'https://i.pravatar.cc/40'}
+              src={
+                normalizeImageReferenceForRender(item.avatarUrl) ||
+                'https://i.pravatar.cc/40'
+              }
               alt={item.personName}
               className="h-5 w-5 rounded-full"
               loading="lazy"

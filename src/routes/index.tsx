@@ -13,10 +13,19 @@ import { LandingTestimonialsSection } from '@/components/landing/landing-testimo
 import { LandingWallSection } from '@/components/landing/landing-wall-section'
 import { Separator } from '@/components/ui/separator'
 import { getPortfolioSessionId, useAnalytics } from '@/lib/analytics'
+import {
+  normalizeImageReferenceForRender,
+  normalizeProjectImageFit,
+} from '@/lib/image-ref'
 
 export const Route = createFileRoute('/')({ component: PortfolioPage })
 
 type Project = Doc<'projects'>
+type ProjectWithMedia = Project & {
+  year?: number
+  landingImageUrl?: string
+  landingImageFit?: 'cover' | 'contain'
+}
 
 const CV_DOWNLOAD_PATH = '/Jakub_Smiarowski_CV.pdf'
 const CV_DOWNLOAD_FILE_NAME = 'Jakub_Smiarowski_CV.pdf'
@@ -80,6 +89,11 @@ function PortfolioPage() {
 
   const showcaseProjects = useMemo<ProjectShowcaseItem[]>(() => {
     const guessYear = (project: Project, index: number) => {
+      const projectWithMedia = project as ProjectWithMedia
+      if (typeof projectWithMedia.year === 'number') {
+        return String(projectWithMedia.year)
+      }
+
       const source = `${project.title} ${project.headline} ${project.summary} ${project.body.join(' ')}`
       const match = source.match(/\b(20\d{2})\b/)
       if (match?.[1]) {
@@ -88,13 +102,20 @@ function PortfolioPage() {
       return `${new Date().getFullYear() - Math.floor(index / 2)}`
     }
 
-    return (projects ?? []).map((project, index) => ({
-      title: project.title,
-      description: project.headline,
-      year: guessYear(project, index),
-      link: `/projects/${project.slug}`,
-      image: project.coverImageUrl,
-    }))
+    return (projects ?? []).map((project, index) => {
+      const projectWithMedia = project as ProjectWithMedia
+      const landingImageUrl =
+        projectWithMedia.landingImageUrl || project.coverImageUrl
+
+      return {
+        title: project.title,
+        description: project.headline,
+        year: guessYear(project, index),
+        link: `/projects/${project.slug}`,
+        image: normalizeImageReferenceForRender(landingImageUrl),
+        imageFit: normalizeProjectImageFit(projectWithMedia.landingImageFit),
+      }
+    })
   }, [projects])
 
   const stats = siteSettings?.quickStats ?? {

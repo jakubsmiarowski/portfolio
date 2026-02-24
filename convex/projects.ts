@@ -1,12 +1,14 @@
 import { mutation, query } from './_generated/server'
-import type { Doc } from './_generated/dataModel'
 import { v } from 'convex/values'
 
 import { adminTokenArg, requireAdmin } from './lib/adminAuth'
+import { normalizeImageReference, requireImageReference } from './lib/imageRef'
 import { pickDefined } from './lib/object'
 
-type ProjectDoc = Doc<'projects'>
 type FeatureCardInput = { title: string; emoji?: string; content: string }
+type ProjectImageFit = 'cover' | 'contain'
+
+const MIN_PROJECT_YEAR = 1990
 
 function normalizeOptionalString(value: string | undefined) {
   if (value === undefined) {
@@ -31,6 +33,27 @@ function normalizeFeatureCards(cards: FeatureCardInput[] | undefined) {
     .filter((card) => card.title.length > 0 && card.content.length > 0)
 
   return normalized.length > 0 ? normalized : undefined
+}
+
+function normalizeProjectImageFit(value: ProjectImageFit | undefined, fallback: ProjectImageFit) {
+  return value === 'contain' ? 'contain' : fallback
+}
+
+function normalizeProjectYear(value: number | undefined) {
+  if (value === undefined) {
+    return undefined
+  }
+
+  if (!Number.isInteger(value)) {
+    throw new Error('Year must be an integer')
+  }
+
+  const maxYear = new Date().getFullYear() + 1
+  if (value < MIN_PROJECT_YEAR || value > maxYear) {
+    throw new Error(`Year must be between ${MIN_PROJECT_YEAR} and ${maxYear}`)
+  }
+
+  return value
 }
 
 export const listPublished = query({
@@ -70,7 +93,12 @@ export const create = mutation({
         }),
       ),
     ),
+    year: v.optional(v.number()),
     coverImageUrl: v.string(),
+    landingImageUrl: v.optional(v.string()),
+    detailImageUrl: v.optional(v.string()),
+    landingImageFit: v.optional(v.union(v.literal('cover'), v.literal('contain'))),
+    detailImageFit: v.optional(v.union(v.literal('cover'), v.literal('contain'))),
     liveUrl: v.optional(v.string()),
     repoUrl: v.optional(v.string()),
     caseStudyUrl: v.optional(v.string()),
@@ -104,25 +132,39 @@ export const create = mutation({
       order = (lastProject?.order ?? 0) + 1
     }
 
-    return await ctx.db.insert('projects', {
-      slug: args.slug,
-      title: args.title,
-      headline: args.headline,
-      summary: args.summary,
-      body: args.body,
-      featureCards: normalizeFeatureCards(args.featureCards),
-      coverImageUrl: args.coverImageUrl,
-      liveUrl: normalizeOptionalString(args.liveUrl),
-      repoUrl: normalizeOptionalString(args.repoUrl),
-      caseStudyUrl: normalizeOptionalString(args.caseStudyUrl),
-      tags: args.tags,
-      accentColor: args.accentColor,
-      bgTint: normalizeOptionalString(args.bgTint),
-      status: args.status,
-      order,
-      createdAt: now,
-      updatedAt: now,
-    })
+    const year = normalizeProjectYear(args.year)
+    const coverImageUrl = requireImageReference(args.coverImageUrl, 'coverImageUrl')
+    const landingImageUrl =
+      normalizeImageReference(args.landingImageUrl) ?? coverImageUrl
+    const detailImageUrl = normalizeImageReference(args.detailImageUrl) ?? coverImageUrl
+
+    return await ctx.db.insert(
+      'projects',
+      {
+        slug: args.slug,
+        title: args.title,
+        headline: args.headline,
+        summary: args.summary,
+        body: args.body,
+        featureCards: normalizeFeatureCards(args.featureCards),
+        year,
+        coverImageUrl,
+        landingImageUrl,
+        detailImageUrl,
+        landingImageFit: normalizeProjectImageFit(args.landingImageFit, 'cover'),
+        detailImageFit: normalizeProjectImageFit(args.detailImageFit, 'contain'),
+        liveUrl: normalizeOptionalString(args.liveUrl),
+        repoUrl: normalizeOptionalString(args.repoUrl),
+        caseStudyUrl: normalizeOptionalString(args.caseStudyUrl),
+        tags: args.tags,
+        accentColor: args.accentColor,
+        bgTint: normalizeOptionalString(args.bgTint),
+        status: args.status,
+        order,
+        createdAt: now,
+        updatedAt: now,
+      } as never,
+    )
   },
 })
 
@@ -144,7 +186,12 @@ export const update = mutation({
         }),
       ),
     ),
+    year: v.optional(v.number()),
     coverImageUrl: v.optional(v.string()),
+    landingImageUrl: v.optional(v.string()),
+    detailImageUrl: v.optional(v.string()),
+    landingImageFit: v.optional(v.union(v.literal('cover'), v.literal('contain'))),
+    detailImageFit: v.optional(v.union(v.literal('cover'), v.literal('contain'))),
     liveUrl: v.optional(v.string()),
     repoUrl: v.optional(v.string()),
     caseStudyUrl: v.optional(v.string()),
@@ -180,13 +227,12 @@ export const update = mutation({
       headline: args.headline,
       summary: args.summary,
       body: args.body,
-      coverImageUrl: args.coverImageUrl,
       tags: args.tags,
       accentColor: args.accentColor,
       status: args.status,
       order: args.order,
       updatedAt: Date.now(),
-    }) as Partial<ProjectDoc>
+    }) as Record<string, unknown>
 
     if ('liveUrl' in args) {
       patch.liveUrl = normalizeOptionalString(args.liveUrl)
@@ -208,7 +254,62 @@ export const update = mutation({
       patch.featureCards = normalizeFeatureCards(args.featureCards)
     }
 
-    return await ctx.db.patch(args.id, patch)
+    if ('year' in args) {
+      patch.year = normalizeProjectYear(args.year)
+    }
+
+    const projectWithMedia = project as {
+      coverImageUrl: string
+      landingImageUrl?: string
+      detailImageUrl?: string
+    }
+
+    let resolvedCoverImageUrl = projectWithMedia.coverImageUrl
+    if ('coverImageUrl' in args) {
+      resolvedCoverImageUrl = requireImageReference(args.coverImageUrl, 'coverImageUrl')
+      patch.coverImageUrl = resolvedCoverImageUrl
+    }
+
+    if ('landingImageUrl' in args) {
+      const landingImageUrl =
+        normalizeImageReference(args.landingImageUrl) ?? resolvedCoverImageUrl
+      patch.landingImageUrl = landingImageUrl
+
+      if (!('coverImageUrl' in args)) {
+        patch.coverImageUrl = landingImageUrl
+      }
+    }
+
+    if ('detailImageUrl' in args) {
+      patch.detailImageUrl =
+        normalizeImageReference(args.detailImageUrl) ?? resolvedCoverImageUrl
+    }
+
+    if ('landingImageFit' in args) {
+      patch.landingImageFit = normalizeProjectImageFit(args.landingImageFit, 'cover')
+    }
+
+    if ('detailImageFit' in args) {
+      patch.detailImageFit = normalizeProjectImageFit(args.detailImageFit, 'contain')
+    }
+
+    if (
+      'coverImageUrl' in args &&
+      !('landingImageUrl' in args) &&
+      !projectWithMedia.landingImageUrl
+    ) {
+      patch.landingImageUrl = resolvedCoverImageUrl
+    }
+
+    if (
+      'coverImageUrl' in args &&
+      !('detailImageUrl' in args) &&
+      !projectWithMedia.detailImageUrl
+    ) {
+      patch.detailImageUrl = resolvedCoverImageUrl
+    }
+
+    return await ctx.db.patch(args.id, patch as never)
   },
 })
 

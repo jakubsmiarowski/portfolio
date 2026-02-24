@@ -17,7 +17,16 @@ export default defineSchema({
         }),
       ),
     ),
+    year: v.optional(v.number()),
     coverImageUrl: v.string(),
+    landingImageUrl: v.optional(v.string()),
+    detailImageUrl: v.optional(v.string()),
+    landingImageFit: v.optional(
+      v.union(v.literal('cover'), v.literal('contain')),
+    ),
+    detailImageFit: v.optional(
+      v.union(v.literal('cover'), v.literal('contain')),
+    ),
     liveUrl: v.optional(v.string()),
     repoUrl: v.optional(v.string()),
     caseStudyUrl: v.optional(v.string()),

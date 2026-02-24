@@ -23,6 +23,8 @@ type AdminProjectsTabProps = {
   onGlobalMessage: (message: string) => void
 }
 
+const MIN_PROJECT_YEAR = 1990
+
 export function AdminProjectsTab({
   adminToken,
   onGlobalMessage,
@@ -37,6 +39,7 @@ export function AdminProjectsTab({
   const [projectEditingId, setProjectEditingId] = useState<Id<'projects'> | null>(
     null,
   )
+  const maxProjectYear = new Date().getFullYear() + 1
 
   const emptyProjectForm = createEmptyProjectForm()
 
@@ -74,8 +77,15 @@ export function AdminProjectsTab({
             'React, TypeScript, Node.js, Stripe, and a custom availability engine with focus on predictable flows and admin operability.',
         },
       ],
+      year: '2026',
       coverImageUrl:
         'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
+      landingImageUrl:
+        'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
+      detailImageUrl:
+        'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
+      landingImageFit: 'cover' as const,
+      detailImageFit: 'contain' as const,
       liveUrl: 'https://corporate-events-demo.vercel.app',
       repoUrl: 'https://github.com/example/corporate-events',
       caseStudyUrl: 'https://medium.com/example/corporate-events-case-study',
@@ -110,8 +120,15 @@ export function AdminProjectsTab({
             'Red and yellow accents reflect the brand and improve visual scanning. Typography and spacing were tuned for readability across long-form event content.',
         },
       ],
+      year: '2025',
       coverImageUrl:
         'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200',
+      landingImageUrl:
+        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200',
+      detailImageUrl:
+        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200',
+      landingImageFit: 'cover' as const,
+      detailImageFit: 'contain' as const,
       liveUrl: 'https://mrr.bike/',
       repoUrl: '',
       caseStudyUrl: '',
@@ -133,6 +150,14 @@ export function AdminProjectsTab({
   }
 
   const loadProjectToForm = (project: Doc<'projects'>) => {
+    const projectWithMedia = project as Doc<'projects'> & {
+      year?: number
+      landingImageUrl?: string
+      detailImageUrl?: string
+      landingImageFit?: 'cover' | 'contain'
+      detailImageFit?: 'cover' | 'contain'
+    }
+
     const fromProjectCards: FeatureCardForm[] = Array.isArray(project.featureCards)
       ? project.featureCards.map((card) => ({
           title: String(card?.title || '').trim(),
@@ -155,6 +180,10 @@ export function AdminProjectsTab({
       fromProjectCards.filter((card) => card.title || card.content).length > 0
         ? fromProjectCards
         : legacyCards
+    const landingImageUrl =
+      projectWithMedia.landingImageUrl || project.coverImageUrl
+    const detailImageUrl =
+      projectWithMedia.detailImageUrl || project.coverImageUrl
 
     setProjectEditingId(project._id)
     setProjectForm({
@@ -163,7 +192,15 @@ export function AdminProjectsTab({
       headline: project.headline,
       summary: project.summary,
       featureCards,
-      coverImageUrl: project.coverImageUrl,
+      year:
+        typeof projectWithMedia.year === 'number'
+          ? String(projectWithMedia.year)
+          : '',
+      coverImageUrl: landingImageUrl,
+      landingImageUrl,
+      detailImageUrl,
+      landingImageFit: projectWithMedia.landingImageFit || 'cover',
+      detailImageFit: projectWithMedia.detailImageFit || 'contain',
       liveUrl: project.liveUrl || '',
       repoUrl: project.repoUrl || '',
       caseStudyUrl: project.caseStudyUrl || '',
@@ -183,6 +220,28 @@ export function AdminProjectsTab({
       return
     }
 
+    const year = Number.parseInt(projectForm.year, 10)
+    if (!Number.isInteger(year)) {
+      onGlobalMessage('Year is required and must be a number.')
+      return
+    }
+
+    if (year < MIN_PROJECT_YEAR || year > maxProjectYear) {
+      onGlobalMessage(
+        `Year must be between ${MIN_PROJECT_YEAR} and ${maxProjectYear}.`,
+      )
+      return
+    }
+
+    const landingImageUrl =
+      projectForm.landingImageUrl.trim() || projectForm.coverImageUrl.trim()
+    if (!landingImageUrl) {
+      onGlobalMessage('Landing image URL is required.')
+      return
+    }
+
+    const detailImageUrl = projectForm.detailImageUrl.trim() || landingImageUrl
+
     const payload = {
       adminToken,
       slug: projectForm.slug.trim(),
@@ -191,7 +250,12 @@ export function AdminProjectsTab({
       summary: projectForm.summary.trim(),
       body: featureCards.map((card) => card.content),
       featureCards,
-      coverImageUrl: projectForm.coverImageUrl.trim(),
+      year,
+      coverImageUrl: landingImageUrl,
+      landingImageUrl,
+      detailImageUrl,
+      landingImageFit: projectForm.landingImageFit,
+      detailImageFit: projectForm.detailImageFit,
       liveUrl: projectForm.liveUrl.trim(),
       repoUrl: projectForm.repoUrl.trim(),
       caseStudyUrl: projectForm.caseStudyUrl.trim(),
@@ -281,7 +345,7 @@ export function AdminProjectsTab({
           </div>
         ) : null}
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-3">
           <Input
             placeholder="Slug"
             value={projectForm.slug}
@@ -295,6 +359,17 @@ export function AdminProjectsTab({
             value={projectForm.title}
             onChange={(event) =>
               setProjectForm((prev) => ({ ...prev, title: event.target.value }))
+            }
+            required
+          />
+          <Input
+            placeholder="Year"
+            type="number"
+            min={MIN_PROJECT_YEAR}
+            max={maxProjectYear}
+            value={projectForm.year}
+            onChange={(event) =>
+              setProjectForm((prev) => ({ ...prev, year: event.target.value }))
             }
             required
           />
@@ -448,17 +523,66 @@ export function AdminProjectsTab({
           </div>
         </div>
 
-        <Input
-          placeholder="Cover image URL"
-          value={projectForm.coverImageUrl}
-          onChange={(event) =>
-            setProjectForm((prev) => ({
-              ...prev,
-              coverImageUrl: event.target.value,
-            }))
-          }
-          required
-        />
+        <div className="space-y-3 rounded-xl border p-3">
+          <div>
+            <p className="text-sm font-medium text-foreground/90">Project images</p>
+            <p className="text-xs text-muted-foreground">
+              Shortcut: <code>/pg</code> resolves to <code>/pictures/pg.jpeg</code>.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input
+              placeholder="Landing image URL"
+              value={projectForm.landingImageUrl}
+              onChange={(event) =>
+                setProjectForm((prev) => ({
+                  ...prev,
+                  landingImageUrl: event.target.value,
+                  coverImageUrl: event.target.value,
+                }))
+              }
+              required
+            />
+            <select
+              className="h-10 rounded-md border bg-background px-3 text-sm"
+              value={projectForm.landingImageFit}
+              onChange={(event) =>
+                setProjectForm((prev) => ({
+                  ...prev,
+                  landingImageFit: event.target.value as 'cover' | 'contain',
+                }))
+              }
+            >
+              <option value="cover">Landing fit: cover</option>
+              <option value="contain">Landing fit: contain</option>
+            </select>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input
+              placeholder="Detail image URL (optional)"
+              value={projectForm.detailImageUrl}
+              onChange={(event) =>
+                setProjectForm((prev) => ({
+                  ...prev,
+                  detailImageUrl: event.target.value,
+                }))
+              }
+            />
+            <select
+              className="h-10 rounded-md border bg-background px-3 text-sm"
+              value={projectForm.detailImageFit}
+              onChange={(event) =>
+                setProjectForm((prev) => ({
+                  ...prev,
+                  detailImageFit: event.target.value as 'cover' | 'contain',
+                }))
+              }
+            >
+              <option value="cover">Detail fit: cover</option>
+              <option value="contain">Detail fit: contain</option>
+            </select>
+          </div>
+        </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <Input
@@ -544,7 +668,12 @@ export function AdminProjectsTab({
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="font-medium">{project.title}</p>
-                  <p className="text-xs text-muted-foreground">/{project.slug}</p>
+                  <p className="text-xs text-muted-foreground">
+                    /{project.slug}
+                    {typeof (project as { year?: number }).year === 'number'
+                      ? ` • ${(project as { year?: number }).year}`
+                      : ''}
+                  </p>
                 </div>
                 <Badge
                   variant={

@@ -179,6 +179,9 @@ export function AdminTestimonialsTab({
             }))
           }
         />
+        <p className="text-xs text-muted-foreground">
+          Shortcut: <code>/pg</code> resolves to <code>/pictures/pg.jpeg</code>.
+        </p>
 
         <Textarea
           placeholder="Quote"
