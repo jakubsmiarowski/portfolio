@@ -8,14 +8,9 @@ import { LandingFooterSection } from '@/components/landing/landing-footer-sectio
 import { LandingHeroSection } from '@/components/landing/landing-hero-section'
 import { LandingProjectsSection } from '@/components/landing/landing-projects-section'
 import { LandingTestimonialsSection } from '@/components/landing/landing-testimonials-section'
-import { LandingWallSection } from '@/components/landing/landing-wall-section'
 import { Separator } from '@/components/ui/separator'
-import { getPortfolioSessionId, useAnalytics } from '@/lib/analytics'
-import {
-  getPortfolioPageData,
-  submitContactMessage,
-  submitWallEntry,
-} from '@/lib/public-content'
+import { useAnalytics } from '@/lib/analytics'
+import { getPortfolioPageData, submitContactMessage } from '@/lib/public-content'
 import {
   buildCanonicalLinks,
   buildSeoMeta,
@@ -62,7 +57,7 @@ const CV_DOWNLOAD_PATH = '/Jakub_Smiarowski_CV.pdf'
 const CV_DOWNLOAD_FILE_NAME = 'Jakub_Smiarowski_CV.pdf'
 
 function PortfolioPage() {
-  const { projects, testimonials, siteSettings, wallEntries } = Route.useLoaderData()
+  const { projects, testimonials, siteSettings } = Route.useLoaderData()
   const { trackEvent } = useAnalytics()
 
   const [activeTestimonialIndex, setActiveTestimonialIndex] = useState(0)
@@ -74,13 +69,6 @@ function PortfolioPage() {
     content: '',
   })
   const [contactError, setContactError] = useState<string | null>(null)
-  const [wallState, setWallState] = useState({
-    displayName: '',
-    message: '',
-  })
-  const [isWallSubmitting, setIsWallSubmitting] = useState(false)
-  const [wallError, setWallError] = useState<string | null>(null)
-  const [wallSuccess, setWallSuccess] = useState(false)
 
   useEffect(() => {
     void trackEvent('page_view')
@@ -149,47 +137,6 @@ function PortfolioPage() {
   }, [projects])
 
   const stats = siteSettings.quickStats
-  const isWallEnabled = siteSettings.wallEnabled
-  const wallTickerDuration = Math.max(siteSettings.wallTickerDurationSec ?? 38, 10)
-  const approvedWallEntries = wallEntries
-  const wallTickerEntries =
-    approvedWallEntries.length > 0
-      ? [...approvedWallEntries, ...approvedWallEntries]
-      : []
-
-  async function handleWallSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!wallState.displayName.trim()) {
-      setWallError('Please add your name before submitting.')
-      return
-    }
-
-    setIsWallSubmitting(true)
-    setWallError(null)
-    setWallSuccess(false)
-
-    try {
-      await submitWallEntry({
-        data: {
-          displayName: wallState.displayName.trim(),
-          message: wallState.message.trim() || undefined,
-          sessionId: getPortfolioSessionId(),
-        },
-      })
-      await trackEvent('wall_submit')
-      setWallSuccess(true)
-      setWallState({ displayName: '', message: '' })
-    } catch (error) {
-      setWallError(
-        error instanceof Error
-          ? error.message
-          : 'Wall entry could not be submitted right now.',
-      )
-    } finally {
-      setIsWallSubmitting(false)
-    }
-  }
 
   async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -243,24 +190,6 @@ function PortfolioPage() {
     })
   }
 
-  function handleWallDisplayNameChange(value: string) {
-    setWallState((prev) => ({
-      ...prev,
-      displayName: value,
-    }))
-    setWallError(null)
-    setWallSuccess(false)
-  }
-
-  function handleWallMessageChange(value: string) {
-    setWallState((prev) => ({
-      ...prev,
-      message: value,
-    }))
-    setWallError(null)
-    setWallSuccess(false)
-  }
-
   function handleContactStateChange(
     field: 'senderName' | 'senderEmail' | 'content',
     value: string,
@@ -304,22 +233,6 @@ function PortfolioPage() {
           testimonials={testimonials}
           activeTestimonialIndex={activeTestimonialIndex}
           onSelectTestimonial={handleSelectTestimonial}
-        />
-
-        {isWallEnabled ? <Separator className="my-14" /> : null}
-
-        <LandingWallSection
-          isWallEnabled={isWallEnabled}
-          wallState={wallState}
-          isWallSubmitting={isWallSubmitting}
-          wallError={wallError}
-          wallSuccess={wallSuccess}
-          wallTickerDuration={wallTickerDuration}
-          approvedWallEntries={approvedWallEntries}
-          wallTickerEntries={wallTickerEntries}
-          onWallSubmit={handleWallSubmit}
-          onDisplayNameChange={handleWallDisplayNameChange}
-          onMessageChange={handleWallMessageChange}
         />
 
         <Separator className="my-14" />

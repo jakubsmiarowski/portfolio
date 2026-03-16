@@ -3,8 +3,12 @@
   "name": "portfolio",
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
+  "main": "src/server-entry.ts",
   "routes": [
+    {
+      "pattern": "kubasmiarowski.com",
+      "custom_domain": true
+    },
     {
       "pattern": "www.kubasmiarowski.com",
       "custom_domain": true

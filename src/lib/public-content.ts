@@ -13,7 +13,6 @@ export type AnalyticsEventType =
   | 'cta_click'
   | 'testimonial_switch'
   | 'contact_submit'
-  | 'wall_submit'
 
 function getConvexUrl() {
   const convexUrl = process.env.VITE_CONVEX_URL || process.env.CONVEX_URL || ''
@@ -40,17 +39,10 @@ export async function fetchPortfolioPageData() {
     client.query(api.siteSettings.getPublic, {}),
   ])
 
-  const wallEntries = siteSettings.wallEnabled
-    ? await client.query(api.wall.listApproved, {
-        limit: siteSettings.wallMaxVisibleEntries ?? 24,
-      })
-    : []
-
   return {
     projects,
     testimonials,
     siteSettings,
-    wallEntries,
   }
 }
 
@@ -78,15 +70,6 @@ export const submitContactMessage = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const client = createPublicConvexClient()
     return client.mutation(api.messages.submit, data)
-  })
-
-export const submitWallEntry = createServerFn({ method: 'POST' })
-  .inputValidator(
-    (data: { displayName: string; message?: string; sessionId: string }) => data,
-  )
-  .handler(async ({ data }) => {
-    const client = createPublicConvexClient()
-    return client.mutation(api.wall.submit, data)
   })
 
 export const trackPortfolioEvent = createServerFn({ method: 'POST' })
