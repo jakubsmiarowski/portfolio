@@ -1,16 +1,5 @@
 import { useCallback } from 'react'
-import { useMutation } from 'convex/react'
-
-import { api } from '../../convex/_generated/api'
-
-type AnalyticsEventType =
-  | 'page_view'
-  | 'project_open'
-  | 'project_link_click'
-  | 'cta_click'
-  | 'testimonial_switch'
-  | 'contact_submit'
-  | 'wall_submit'
+import { trackPortfolioEvent, type AnalyticsEventType } from '@/lib/public-content'
 
 const SESSION_KEY = 'portfolio_session_id'
 
@@ -36,8 +25,6 @@ export function getPortfolioSessionId() {
 }
 
 export function useAnalytics() {
-  const trackMutation = useMutation(api.analytics.track)
-
   const trackEvent = useCallback(
     async (
       eventType: AnalyticsEventType,
@@ -52,18 +39,20 @@ export function useAnalytics() {
       }
 
       try {
-        await trackMutation({
-          eventType,
-          path: options?.path ?? window.location.pathname,
-          projectSlug: options?.projectSlug,
-          sessionId: createSessionId(),
-          meta: options?.meta,
+        await trackPortfolioEvent({
+          data: {
+            eventType,
+            path: options?.path ?? window.location.pathname,
+            projectSlug: options?.projectSlug,
+            sessionId: createSessionId(),
+            meta: options?.meta,
+          },
         })
       } catch {
         // Analytics must not break core UX.
       }
     },
-    [trackMutation],
+    [],
   )
 
   return {

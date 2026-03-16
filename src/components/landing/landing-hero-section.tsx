@@ -65,8 +65,8 @@ export function LandingHeroSection({
 
         <div className="space-y-5">
           <h1 className="max-w-3xl text-balance text-4xl font-semibold leading-tight tracking-tight text-foreground/90 sm:text-6xl">
-            I&apos;m <span className="text-foreground">Kuba</span>, frontend engineer
-            building clean, high-impact digital products.
+            Kuba Śmiarowski, frontend engineer building clean, high-impact
+            digital products.
           </h1>
           <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
             I ship portfolio-grade interfaces and product surfaces with strong

@@ -15,8 +15,20 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { issueAdminToken, revokeAdminToken } from '@/lib/admin-session'
 import { authClient } from '@/lib/auth-client'
+import { buildNoIndexMeta } from '@/lib/seo'
 
-export const Route = createFileRoute('/admin')({ component: AdminPage })
+export const Route = createFileRoute('/admin')({
+  head: () => ({
+    meta: buildNoIndexMeta(
+      'Portfolio Admin · Kuba Śmiarowski',
+      'Private admin panel for portfolio content management.',
+    ),
+  }),
+  headers: () => ({
+    'X-Robots-Tag': 'noindex, nofollow',
+  }),
+  component: AdminPage,
+})
 
 function getAccessErrorMessage(
   reason: 'unauthenticated' | 'forbidden' | 'misconfigured',

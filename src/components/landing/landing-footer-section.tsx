@@ -1,5 +1,3 @@
-import { Link } from '@tanstack/react-router'
-
 export function LandingFooterSection() {
   return (
     <footer className="mt-16 border-t pt-6 text-sm text-muted-foreground">
@@ -22,9 +20,6 @@ export function LandingFooterSection() {
           >
             LinkedIn
           </a>
-          <Link to="/admin" className="hover:text-foreground">
-            Admin
-          </Link>
         </div>
       </div>
     </footer>

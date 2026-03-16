@@ -1,22 +1,57 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useQuery } from 'convex/react'
 import { ArrowLeft, ArrowUpRight, Github, MoveRight } from 'lucide-react'
 
-import { api } from '../../convex/_generated/api'
-import type { Doc } from 'convex/_generated/dataModel'
+import type { Doc } from '../../convex/_generated/dataModel'
 import { ThemeSwitcher } from '@/components/theme-switcher'
-import { CardHoverEffect, type CardHoverEffectItem } from '@/components/ui/card-hover-effect'
+import {
+  CardHoverEffect,
+  type CardHoverEffectItem,
+} from '@/components/ui/card-hover-effect'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useAnalytics } from '@/lib/analytics'
+import { getProjectPageData } from '@/lib/public-content'
 import {
-  normalizeImageReferenceForRender,
-} from '@/lib/image-ref'
+  buildCanonicalLinks,
+  buildSeoMeta,
+  createProjectJsonLd,
+  getProjectSeo,
+} from '@/lib/seo'
+import { normalizeImageReferenceForRender } from '@/lib/image-ref'
 
 export const Route = createFileRoute('/projects/$slug')({
+  loader: ({ params }) => getProjectPageData({ data: { slug: params.slug } }),
+  head: ({ loaderData, params }) => {
+    if (!loaderData?.project) {
+      return {
+        meta: buildSeoMeta({
+          title: 'Project not found · Kuba Śmiarowski',
+          description: 'Requested case study does not exist or is not published.',
+          pathname: `/projects/${params.slug}`,
+          robots: 'noindex, nofollow',
+        }),
+      }
+    }
+
+    const seo = getProjectSeo(loaderData.project)
+
+    return {
+      meta: [
+        ...buildSeoMeta({
+          title: seo.title,
+          description: seo.description,
+          pathname: `/projects/${loaderData.project.slug}`,
+          image: loaderData.project.detailImageUrl || loaderData.project.coverImageUrl,
+          type: 'article',
+        }),
+        { 'script:ld+json': createProjectJsonLd(loaderData.project) },
+      ],
+      links: buildCanonicalLinks(`/projects/${loaderData.project.slug}`),
+    }
+  },
   component: ProjectPage,
 })
 
@@ -57,26 +92,20 @@ function toFeatureCards(project: Project): CardHoverEffectItem[] {
 }
 
 function ProjectPage() {
-  const { slug } = Route.useParams()
-  const projects = useQuery(api.projects.listPublished)
+  const { project } = Route.useLoaderData()
   const { trackEvent } = useAnalytics()
-
-  const project = useMemo(
-    () => projects?.find((item) => item.slug === slug) ?? null,
-    [projects, slug],
-  )
 
   useEffect(() => {
     if (!project) {
       return
     }
 
-    trackEvent('project_open', {
+    void trackEvent('project_open', {
       projectSlug: project.slug,
     })
   }, [project, trackEvent])
 
-  if (projects && !project) {
+  if (!project) {
     return (
       <main className="min-h-screen bg-background text-foreground">
         <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-5 pb-16 pt-10 sm:px-8 sm:pt-14">
@@ -91,7 +120,7 @@ function ProjectPage() {
               <Avatar size="lg" className="rounded-xl border border-border/70 shadow-xs">
                 <AvatarImage
                   src="/kuba.jpeg"
-                  alt="Kuba Smiarowski"
+                  alt="Kuba Śmiarowski"
                   className="scale-[1.25] object-cover object-[50%_22%]"
                 />
                 <AvatarFallback className="rounded-xl">KS</AvatarFallback>
@@ -107,16 +136,6 @@ function ProjectPage() {
               This project does not exist or has not been published yet.
             </p>
           </div>
-        </div>
-      </main>
-    )
-  }
-
-  if (!project) {
-    return (
-      <main className="min-h-screen bg-background text-foreground">
-        <div className="mx-auto w-full max-w-4xl px-5 pb-16 pt-10 sm:px-8 sm:pt-14">
-          <div className="h-[420px] animate-pulse rounded-3xl border bg-card/60" />
         </div>
       </main>
     )
@@ -142,7 +161,7 @@ function ProjectPage() {
             <Avatar size="lg" className="rounded-xl border border-border/70 shadow-xs">
               <AvatarImage
                 src="/kuba.jpeg"
-                alt="Kuba Smiarowski"
+                alt="Kuba Śmiarowski"
                 className="scale-[1.25] object-cover object-[50%_22%]"
               />
               <AvatarFallback className="rounded-xl">KS</AvatarFallback>
@@ -194,7 +213,7 @@ function ProjectPage() {
                     target="_blank"
                     rel="noreferrer"
                     onClick={() =>
-                      trackEvent('project_link_click', {
+                      void trackEvent('project_link_click', {
                         projectSlug: project.slug,
                         meta: { target: 'live' },
                       })
@@ -212,7 +231,7 @@ function ProjectPage() {
                     target="_blank"
                     rel="noreferrer"
                     onClick={() =>
-                      trackEvent('project_link_click', {
+                      void trackEvent('project_link_click', {
                         projectSlug: project.slug,
                         meta: { target: 'repo' },
                       })
@@ -230,7 +249,7 @@ function ProjectPage() {
                     target="_blank"
                     rel="noreferrer"
                     onClick={() =>
-                      trackEvent('project_link_click', {
+                      void trackEvent('project_link_click', {
                         projectSlug: project.slug,
                         meta: { target: 'case_study' },
                       })

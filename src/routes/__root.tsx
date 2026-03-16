@@ -7,6 +7,7 @@ import {
 
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
+import { getSitePersonName } from '@/lib/seo'
 
 import ConvexProvider from '../integrations/convex/provider'
 
@@ -23,10 +24,14 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Kuba Smiarowski · Portfolio',
+        title: `${getSitePersonName()} · Portfolio`,
       },
     ],
     links: [
+      {
+        rel: 'manifest',
+        href: '/manifest.json',
+      },
       {
         rel: 'icon',
         type: 'image/svg+xml',
@@ -35,6 +40,10 @@ export const Route = createRootRoute({
       {
         rel: 'icon',
         type: 'image/jpeg',
+        href: '/kuba.jpeg',
+      },
+      {
+        rel: 'apple-touch-icon',
         href: '/kuba.jpeg',
       },
       {

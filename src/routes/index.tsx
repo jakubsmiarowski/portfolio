@@ -1,9 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useMutation, useQuery } from 'convex/react'
 
-import { api } from '../../convex/_generated/api'
-import type { Doc } from 'convex/_generated/dataModel'
+import type { Doc } from '../../convex/_generated/dataModel'
 import type { ProjectShowcaseItem } from '@/components/project-showcase'
 import { LandingContactSection } from '@/components/landing/landing-contact-section'
 import { LandingFooterSection } from '@/components/landing/landing-footer-section'
@@ -14,11 +12,44 @@ import { LandingWallSection } from '@/components/landing/landing-wall-section'
 import { Separator } from '@/components/ui/separator'
 import { getPortfolioSessionId, useAnalytics } from '@/lib/analytics'
 import {
+  getPortfolioPageData,
+  submitContactMessage,
+  submitWallEntry,
+} from '@/lib/public-content'
+import {
+  buildCanonicalLinks,
+  buildSeoMeta,
+  createPersonJsonLd,
+  createProfilePageJsonLd,
+  createWebsiteJsonLd,
+  getHomepageSeo,
+} from '@/lib/seo'
+import {
   normalizeImageReferenceForRender,
   normalizeProjectImageFit,
 } from '@/lib/image-ref'
 
-export const Route = createFileRoute('/')({ component: PortfolioPage })
+export const Route = createFileRoute('/')({
+  loader: () => getPortfolioPageData(),
+  head: () => {
+    const seo = getHomepageSeo()
+
+    return {
+      meta: [
+        ...buildSeoMeta({
+          title: seo.title,
+          description: seo.description,
+          pathname: '/',
+        }),
+        { 'script:ld+json': createPersonJsonLd() },
+        { 'script:ld+json': createProfilePageJsonLd() },
+        { 'script:ld+json': createWebsiteJsonLd() },
+      ],
+      links: buildCanonicalLinks('/'),
+    }
+  },
+  component: PortfolioPage,
+})
 
 type Project = Doc<'projects'>
 type ProjectWithMedia = Project & {
@@ -31,15 +62,8 @@ const CV_DOWNLOAD_PATH = '/Jakub_Smiarowski_CV.pdf'
 const CV_DOWNLOAD_FILE_NAME = 'Jakub_Smiarowski_CV.pdf'
 
 function PortfolioPage() {
-  const projects = useQuery(api.projects.listPublished)
-  const testimonials = useQuery(api.testimonials.listPublished)
-  const siteSettings = useQuery(api.siteSettings.getPublic)
-
-  const submitMessage = useMutation(api.messages.submit)
-  const submitWall = useMutation(api.wall.submit)
-  const wallEntries = useQuery(api.wall.listApproved, {
-    limit: siteSettings?.wallMaxVisibleEntries ?? 24,
-  })
+  const { projects, testimonials, siteSettings, wallEntries } = Route.useLoaderData()
+  const { trackEvent } = useAnalytics()
 
   const [activeTestimonialIndex, setActiveTestimonialIndex] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -58,14 +82,12 @@ function PortfolioPage() {
   const [wallError, setWallError] = useState<string | null>(null)
   const [wallSuccess, setWallSuccess] = useState(false)
 
-  const { trackEvent } = useAnalytics()
-
   useEffect(() => {
-    trackEvent('page_view')
+    void trackEvent('page_view')
   }, [trackEvent])
 
   useEffect(() => {
-    if (!testimonials?.length) {
+    if (!testimonials.length) {
       setActiveTestimonialIndex(0)
       return
     }
@@ -73,26 +95,30 @@ function PortfolioPage() {
     setActiveTestimonialIndex((prev) =>
       prev >= testimonials.length ? 0 : prev,
     )
-  }, [testimonials?.length])
+  }, [testimonials.length])
 
   useEffect(() => {
-    if (!testimonials || testimonials.length < 2) {
+    if (testimonials.length < 2) {
       return
     }
 
     const intervalId = window.setInterval(() => {
       setActiveTestimonialIndex((prev) => (prev + 1) % testimonials.length)
-    }, 7000)
+    }, 7_000)
 
     return () => window.clearInterval(intervalId)
   }, [testimonials])
 
   const showcaseProjects = useMemo<ProjectShowcaseItem[]>(() => {
-    const guessYear = (project: Project, index: number) => {
+    function guessYear(project: Project, index: number) {
       const projectWithMedia = project as ProjectWithMedia
-      if (typeof projectWithMedia.year === 'string' && projectWithMedia.year.trim()) {
+      if (
+        typeof projectWithMedia.year === 'string' &&
+        projectWithMedia.year.trim()
+      ) {
         return projectWithMedia.year.trim()
       }
+
       if (typeof projectWithMedia.year === 'number') {
         return `${projectWithMedia.year}`
       }
@@ -102,10 +128,11 @@ function PortfolioPage() {
       if (match?.[1]) {
         return match[1]
       }
+
       return `${new Date().getFullYear() - Math.floor(index / 2)}`
     }
 
-    return (projects ?? []).map((project, index) => {
+    return projects.map((project, index) => {
       const projectWithMedia = project as ProjectWithMedia
       const landingImageUrl =
         projectWithMedia.landingImageUrl || project.coverImageUrl
@@ -121,21 +148,16 @@ function PortfolioPage() {
     })
   }, [projects])
 
-  const stats = siteSettings?.quickStats ?? {
-    projectsShipped: 0,
-    yearsExperience: 0,
-  }
-
-  // const isWallEnabled = siteSettings?.wallEnabled ?? false
-  const isWallEnabled = false
-  const wallTickerDuration = Math.max(siteSettings?.wallTickerDurationSec ?? 38, 10)
-  const approvedWallEntries = wallEntries ?? []
+  const stats = siteSettings.quickStats
+  const isWallEnabled = siteSettings.wallEnabled
+  const wallTickerDuration = Math.max(siteSettings.wallTickerDurationSec ?? 38, 10)
+  const approvedWallEntries = wallEntries
   const wallTickerEntries =
     approvedWallEntries.length > 0
       ? [...approvedWallEntries, ...approvedWallEntries]
       : []
 
-  const handleWallSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  async function handleWallSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (!wallState.displayName.trim()) {
@@ -148,10 +170,12 @@ function PortfolioPage() {
     setWallSuccess(false)
 
     try {
-      await submitWall({
-        displayName: wallState.displayName.trim(),
-        message: wallState.message.trim() || undefined,
-        sessionId: getPortfolioSessionId(),
+      await submitWallEntry({
+        data: {
+          displayName: wallState.displayName.trim(),
+          message: wallState.message.trim() || undefined,
+          sessionId: getPortfolioSessionId(),
+        },
       })
       await trackEvent('wall_submit')
       setWallSuccess(true)
@@ -167,7 +191,7 @@ function PortfolioPage() {
     }
   }
 
-  const handleContactSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (
@@ -184,14 +208,15 @@ function PortfolioPage() {
     setIsContactSuccess(false)
 
     try {
-      await submitMessage({
-        senderName: contactState.senderName.trim(),
-        senderEmail: contactState.senderEmail.trim(),
-        content: contactState.content.trim(),
+      await submitContactMessage({
+        data: {
+          senderName: contactState.senderName.trim(),
+          senderEmail: contactState.senderEmail.trim(),
+          content: contactState.content.trim(),
+        },
       })
 
       await trackEvent('contact_submit')
-
       setIsContactSuccess(true)
       setContactState({ senderName: '', senderEmail: '', content: '' })
     } catch {
@@ -201,7 +226,7 @@ function PortfolioPage() {
     }
   }
 
-  const handleCvDownloadClick = () => {
+  function handleCvDownloadClick() {
     void trackEvent('cta_click', {
       meta: {
         cta: 'download_cv',
@@ -211,14 +236,14 @@ function PortfolioPage() {
     })
   }
 
-  const handleSendMessageClick = () => {
-    trackEvent('cta_click', { meta: { cta: 'send_message' } })
+  function handleSendMessageClick() {
+    void trackEvent('cta_click', { meta: { cta: 'send_message' } })
     document.getElementById('contact-section')?.scrollIntoView({
       behavior: 'smooth',
     })
   }
 
-  const handleWallDisplayNameChange = (value: string) => {
+  function handleWallDisplayNameChange(value: string) {
     setWallState((prev) => ({
       ...prev,
       displayName: value,
@@ -227,7 +252,7 @@ function PortfolioPage() {
     setWallSuccess(false)
   }
 
-  const handleWallMessageChange = (value: string) => {
+  function handleWallMessageChange(value: string) {
     setWallState((prev) => ({
       ...prev,
       message: value,
@@ -236,24 +261,33 @@ function PortfolioPage() {
     setWallSuccess(false)
   }
 
-  const handleContactStateChange = (
+  function handleContactStateChange(
     field: 'senderName' | 'senderEmail' | 'content',
     value: string,
-  ) => {
+  ) {
     setContactState((prev) => ({
       ...prev,
       [field]: value,
     }))
   }
 
+  function handleSelectTestimonial(index: number, personName: string) {
+    setActiveTestimonialIndex(index)
+    void trackEvent('testimonial_switch', {
+      meta: { person: personName },
+    })
+  }
+
+  function handleResetSuccess() {
+    setIsContactSuccess(false)
+  }
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto w-full max-w-4xl px-5 pb-16 pt-10 sm:px-8 sm:pt-14">
         <LandingHeroSection
-          availabilityText={
-            siteSettings?.availabilityText ?? 'Available for selected projects'
-          }
-          availabilityTimezone={siteSettings?.availabilityTimezone ?? 'America/Toronto'}
+          availabilityText={siteSettings.availabilityText}
+          availabilityTimezone={siteSettings.availabilityTimezone}
           projectsShipped={stats.projectsShipped}
           yearsExperience={stats.yearsExperience}
           cvDownloadPath={CV_DOWNLOAD_PATH}
@@ -269,12 +303,7 @@ function PortfolioPage() {
         <LandingTestimonialsSection
           testimonials={testimonials}
           activeTestimonialIndex={activeTestimonialIndex}
-          onSelectTestimonial={(index, personName) => {
-            setActiveTestimonialIndex(index)
-            trackEvent('testimonial_switch', {
-              meta: { person: personName },
-            })
-          }}
+          onSelectTestimonial={handleSelectTestimonial}
         />
 
         {isWallEnabled ? <Separator className="my-14" /> : null}
@@ -302,7 +331,7 @@ function PortfolioPage() {
           contactState={contactState}
           onContactSubmit={handleContactSubmit}
           onContactStateChange={handleContactStateChange}
-          onResetSuccess={() => setIsContactSuccess(false)}
+          onResetSuccess={handleResetSuccess}
         />
 
         <LandingFooterSection />
